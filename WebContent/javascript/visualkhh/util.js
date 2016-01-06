@@ -1579,6 +1579,13 @@ LocationUtil.getHref=function(window_o){
 	}
 	return window_v.location.href;
 };
+LocationUtil.goHref=function(window_o_s,url){
+	if(JavaScriptUtil.isString(window_o_s)){
+		window.location.href=window_o_s;
+	}else{
+		window_o_s.location.href=window_o_s;
+	}
+};
 LocationUtil.getPathName=function(window_o){
 	if(!window_o){
 		window_o = window;
@@ -1865,6 +1872,16 @@ EventUtil.removeEventListener=function(obj_o ,type_event_s,function_f){
      }
 };
 
+EventUtil.addOnClickEventListener=function(object_o_function_f,function_f){
+	if(!object_o_function_f){
+		object_o_function_f=window;
+	}
+	if(JavaScriptUtil.isObject(object_o_function_f)){
+		this.addEventListener(object_o_function_f, this.TYPE_CLICK, function_f);
+	}else if(JavaScriptUtil.isFunction(object_o_function_f)){
+		this.addEventListener(window, this.TYPE_CLICK, object_o_function_f);
+	};
+};
 EventUtil.addOnloadEventListener=function(object_o_function_f,function_f){
 	if(!object_o_function_f){
 		object_o_function_f=window;
@@ -2182,7 +2199,18 @@ JavaScriptUtil.sleep=function(milliseconds){
 	    }
 	  }
 };
-
+JavaScriptUtil.getUniqueKey=function(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now();; //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+};
 
 
 function MathUtil(){};
@@ -3178,7 +3206,7 @@ AjaxK.prototype.onReceive = function(){
         	this.errorCnt++;
         	this.onError(this.requestObj.responseText,this.requestObj.readyState,this.requestObj.status);
         }
-        this.onComplete();
+        this.onComplete(this.getParam());
         this.responsed = true;
         if(this.loop){
         	this.start();
@@ -3196,7 +3224,7 @@ AjaxK.prototype.onReceive = function(){
 
 AjaxK.prototype.start = function(){
 	this.responsed = false;
-	this.onBeforeProcess();
+	this.onBeforeProcess(this.getParam());
 	var concatenateData = null;
 	var applyURL = this.url;
 	if(StringUtil.upper(this.type)=="GET" && this.data){
@@ -3239,6 +3267,9 @@ AjaxK.prototype.setParam = function(param_o){
     };
     this.outparam = JavaScriptUtil.extend(this.outparam,param_o);
 };
+AjaxK.prototype.getParam = function(param_o){
+	return this.outparam;
+};
 AjaxK.prototype.setData = function(data_o){
 	this.data = data_o;
 };
@@ -3257,11 +3288,14 @@ SelectorK.prototype.context = null;
 SelectorK.prototype.selector = null;
 SelectorK.prototype.list = new Array();
 function SelectorK(selector_s,context_e){
+	if(!context_e){
+		context_e = document;
+	}
 	if(selector_s){
 		this.engin(selector_s,context_e);
 	}
 };
-SelectorK.prototype.find = function(selector_s,context_e){
+SelectorK.prototype.find = function(selector_s){
 	var findlist = new Array();
 	this.each(function(index){
 		findlist = findlist.concat(Sizzle(selector_s,this));
@@ -3282,7 +3316,10 @@ SelectorK.prototype.each = function(function_f){
 	}
 };
 SelectorK.prototype.get = function(index_n){
-	this.list[i];
+	return this.list[index_n];
+};
+SelectorK.prototype.size = function(){
+	return this.list.length;
 };
 
 
