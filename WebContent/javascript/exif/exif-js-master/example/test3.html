@@ -1,0 +1,64 @@
+<!DOCTYPE html> 
+<html lang="ko">  
+<head>
+<style type="text/css">
+
+dt {
+	width: 120px;
+	float: left;
+}
+
+video {
+	background-color: black;
+}
+
+</style>
+<script type="text/javascript" src="./exif-js-master/exif.js"></script>
+<script type="text/javascript" src="./exif-js-master/binary.js"></script>
+
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+	  var input = document.querySelector('input[type="file"]');
+	  input.addEventListener("change", function(event) {
+	    // FileList 오브젝트
+	    var files = event.target.files;
+	    // 선택된 파일을 나타내는 File 오브젝트
+	    var file = files[0];
+	    if( ! file ) { return; }
+	    
+	    var reader = new FileReader; // use HTML5 file reader to get the file
+	    reader.onloadend = function () {
+            // get EXIF data
+            var exif = EXIF.readFromBinaryFile(new BinaryFile(this.result));
+
+            var lat = exif.GPSLatitude;
+            var lon = exif.GPSLongitude;
+
+            //Convert coordinates to WGS84 decimal
+            var latRef = exif.GPSLatitudeRef || "N";  
+            var lonRef = exif.GPSLongitudeRef || "W";  
+            lat = (lat[0] + lat[1]/60 + lat[2]/3600) * (latRef == "N" ? 1 : -1);  
+            lon = (lon[0] + lon[1]/60 + lon[2]/3600) * (lonRef == "W" ? -1 : 1); 
+
+           //Send the coordinates to your map
+            alert(lat+","+lon);
+        } 
+	    reader.readAsBinaryString(file); 
+	    
+	    
+	  }, false);
+	}, false);
+
+</script>
+<meta charset="UTF-8" /> 
+<title>File API</title> 
+
+</head> 
+<body> 
+<p><input type="file" /></p>
+
+
+
+
+</body>
+</html>

@@ -627,7 +627,7 @@ StringUtil.getByteLength=function(inputStr_s){
 		msg = msg.replace(regexp,"");
 	}
 	
-	return StringUtil.injection(msg, param, openChar, closeChar);
+	return StringUtil.inJection(msg, openChar, closeChar,param);
 }
 
 
@@ -2181,7 +2181,7 @@ JavaScriptUtil.extend = function(superreobject_o,childobject_o){
 //	  if (!$.isFunction (obj[prop])) $content.append (
 //	          "<b>" + prop + "</b>  = " + obj[prop] + "<br />");
 
-JavaScriptUtil.getRandomInt=function(size_n){
+JavaScriptUtil.getRandomInt=function(size_n,size_max){
 //	 var result = Math.floor(Math.random() * 10) + 1;
 	 return Math.floor(Math.random() * size_n);
 };
@@ -2222,6 +2222,96 @@ MathUtil.round=function(numValue_n,precision_n){
 	var precNum = Math.round(tempNum*multiplier);
 	precNum= precNum/multiplier;
 	return wholeNum+precNum;	
+};
+MathUtil.gpsdist=function(lat1, lon1, lat2, lon2, unit){
+	if(!unit){unit="m"};
+	  var theta = lon1 - lon2;
+      var dist = Math.sin(MathUtil.degTorad(lat1)) * Math.sin(MathUtil.degTorad(lat2)) + Math.cos(MathUtil.degTorad(lat1)) * Math.cos(MathUtil.degTorad(lat2))
+              * Math.cos(MathUtil.degTorad(theta));
+      dist = Math.acos(dist);
+      dist = MathUtil.radTodeg(dist);
+      dist = dist * 60 * 1.1515;
+      if ( unit == "K") {
+          dist = dist * 1.609344;
+      } else if ( unit == "N") {
+          dist = dist * 0.8684;
+      } else if ( unit == "m") {
+          dist = dist * 1.609344;
+          dist = dist * 1000;
+      }
+      return (dist);
+};
+
+/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+/* :: This function converts decimal degrees to radians : */
+/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+MathUtil.degTorad=function(deg) {
+    return (deg * Math.PI / 180.0);
+};
+/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+/* :: This function converts radians to decimal degrees : */
+/* ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: */
+MathUtil.radTodeg=function(rad) {
+    return (rad * 180.0 / Math.PI);
+};
+
+
+//end - start    끝과 시작의 사이길이를 취득한다.
+MathUtil.getBetweenLength=function(start, end){
+	return end - start;
+};
+
+//전체값에서 일부값은 몇 퍼센트? 계산법 공식    tot에서  data는 몇%인가.
+MathUtil.getPercentByTot=function(tot, data){
+	/*
+	전체값에서 일부값은 몇 퍼센트? 계산법 공식
+	일부값 ÷ 전체값 X 100
+	예제) 300에서 105는 몇퍼센트?
+	답: 35%
+	*/
+	return (data / tot) * 100;
+};
+//전체값의 몇 퍼센트는 얼마? 계산법 공식    tot에서  wantPercent는 몇인가?
+MathUtil.getValueByTotInPercent=function(tot, wantPercent){
+	/*
+	전체값 X 퍼센트 ÷ 100
+	예제) 300의 35퍼센트는 얼마?
+	답) 105
+	 */
+	return (tot * wantPercent) / 100;
+};
+//숫자를 몇 퍼센트 증가시키는 공식    tot에서  wantPercent을 증가 시킨다
+MathUtil.getValuePercentUp=function(tot, wantPercent){
+	/*
+	숫자를 몇 퍼센트 증가시키는 공식
+	숫자 X (1 + 퍼센트 ÷ 100)
+	예제) 1548을 66퍼센트 증가하면?
+	답) 2569.68
+	 */
+	return tot * (1 + wantPercent / 100);
+};
+//숫자를 몇 퍼센트 감소하는 공식    tot에서  wantPercent을 증감 시킨다
+MathUtil.getValuePercentDown=function(tot, wantPercent){
+	/*
+	숫자를 몇 퍼센트 감소하는 공식
+	숫자 X (1 - 퍼센트 ÷ 100)
+	예제) 1548을 66퍼센트 감소하면?
+	답) 526.32
+	 */
+	return tot * (1 - wantPercent / 100);
+};
+
+
+
+function GraphicsUtil(){};
+GraphicsUtil.prototype = new Object();
+GraphicsUtil.getRandomColor=function(){
+	  var letters = '0123456789ABCDEF'.split('');
+	  var color = '#';
+	  for (var i = 0; i < 6; i++ ) {
+	      color += letters[Math.floor(Math.random() * 16)];
+	  }
+	  return color;
 };
 
 
@@ -3458,16 +3548,237 @@ UiFlow.prototype.setParam = function(param_o){
 
 
 
+//html5
+ImgEncrypt.prototype = new Object();
+ImgEncrypt.prototype.context			= undefined;
+ImgEncrypt.prototype.img				= undefined;
+ImgEncrypt.prototype.canvas				= undefined;
+function ImgEncrypt(imgSelector,canvasSelector){
+	
+	// img요소의 생성
+	this.context = this;
+	this.img = JavaScriptUtil.isString(imgSelector)?document.querySelector(imgSelector):imgSelector;//new Image();
+	this.canvas = JavaScriptUtil.isString(canvasSelector)?document.querySelector(canvasSelector):canvasSelector;
+	// img요소의 이미지가 로드되면 처리 시작
+	//this.img.onload = this.draw.call(this);
+}
 
+ImgEncrypt.prototype.encode = function(wminSize,hSize) {
+	  var context = this.canvas.getContext("2d");
+	  this.canvas.width		= this.img.width;
+	  this.canvas.height	= this.img.height;
+	  var imgW = parseInt(this.canvas.width);
+	  var imgH = parseInt(this.canvas.height);
+	  
+	  var yPoint = 0;
+	  var xPoint = 0;
+	  var list = new Array();
+	  var yIndex = -1;
+	  while(yPoint<imgH){
+		  var wSize = JavaScriptUtil.getRandomInt(wminSize)+1;
+//		  var wSize = wminSize;
+		  if(xPoint+wSize>imgW){wSize = imgW-xPoint;}; //넘치면 셋팅
+		  
+		  
+		  if(xPoint==0){
+			  yIndex++;
+			  list[yIndex] = new Array();
+		  }
+		  
+		  //context.drawImage(this.img,   /**/ xPoint, yPoint, wSize, hSize,   /**/ xPoint, yPoint, wSize, hSize);
+		  var o ={
+				  x:xPoint,
+				  y:yPoint,
+				  w:wSize,
+				  h:hSize
+		  }
+		  
+		  list[yIndex].push(o);
+		  
+		  xPoint+=wSize;//x축 증가
+		  if(xPoint==imgW){
+			  xPoint = 0;
+			  yPoint += hSize;
+			  if(yPoint+hSize>imgH){hSize = imgH-yPoint;}; //넘치면 셋팅
+		  }; //넘치면 셋팅
+		  
+	  }
+	  
+	  
+	  
 
+	  //randomW
+	  var radnomWList = new Array();
+	  for (var i = 0; i < list.length; i++) {
+		  radnomWList[i] = new Array();
+		  while( list[i].length > 0 ){
+			  var el = list[i].splice( JavaScriptUtil.getRandomInt(list[i].length), 1 );
+			  radnomWList[i].push(el[0]);
+		  }
+	  }
+//	  //randomH
+	  var radnomList = new Array();
+	  while( radnomWList.length > 0 ){
+		  var el = radnomWList.splice( JavaScriptUtil.getRandomInt(radnomWList.length), 1 );
+		  radnomList.push(el[0]);
+	  }
+	  
+////	  
+//	  var radnomList = radnomWList;
+	  
+	  //encode
+	  yPoint = 0;
+	  xPoint = 0;
+	  for (var i = 0; i < radnomList.length; i++) {
+		  for (var y = 0; y < radnomList[i].length; y++) {
+			  var o = radnomList[i][y];
+			  context.drawImage(this.img,   /**/ o.x, o.y, o.w, o.h,   /**/ xPoint, yPoint, o.w, o.h);
+			  xPoint+=o.w;
+			  if((y+1)>=radnomList[i].length){
+				  yPoint+=o.h;
+				  xPoint=0;
+			  }
+		  }
+		  
+	  }
+	  
+	  return radnomList;
+}
 
+ImgEncrypt.prototype.decode = function(key) {
+	var useKey = key.slice();
+	this.canvas.width = this.img.width;
+	this.canvas.height = this.img.height;
+	var context = this.canvas.getContext("2d");
+	
+	  var yPoint = 0;
+	  var xPoint = 0;
+	  //decode
+	  for (var i = 0; i < useKey.length; i++) {
+		  for (var y = 0; y < useKey[i].length; y++) {
+			  var o = useKey[i][y];
+			  context.drawImage(this.img,   /**/ xPoint, yPoint, o.w, o.h,   /**/ o.x, o.y, o.w, o.h);
+			  xPoint+=o.w;
+			  if((y+1)>=useKey[i].length){
+				  yPoint+=o.h;
+				  xPoint=0;
+			  }
+		  }
+		  
+	  }
+	  
+}
 
-
-
-
-
-
-
+//ImgEncrypt.prototype.encode = function(wCnt,hCnt) {
+//	
+//	  // canvas요소
+//	  var context = this.canvas.getContext("2d");
+//	  this.canvas.width = this.img.width;
+//	  this.canvas.height =this.img.height;
+//	  
+//	  
+//	  var w = parseInt(this.canvas.width);
+//	  var h = parseInt(this.canvas.height);
+//
+//	// 분할 할 조각 수 
+//	  var n1 = wCnt; // 가로 
+//	  var n2 = hCnt; //세로
+//	  
+//	  // 한 조각의 크기
+//	  var pw = w / n1;
+//	  var ph = h / n2;
+//	           
+//	  // 각 조각의 왼쪽 위의 좌표를 배열에 넣기
+//	  var pp = [];
+//	  for( var y=0; y<h; y+=ph ) {
+//	    for( var x=0; x<w; x+=pw ) {
+//	      pp.push([x, y]);
+//	    }
+//	  }
+//
+//	  console.log("pp size"+pp.length);
+//	  var rpp = [];
+//	  while( pp.length > 0 ){
+////		  var el = pp.splice( Math.floor(Math.random() * pp.length), 1 );
+//		  var el = pp.splice( JavaScriptUtil.getRandomInt(pp.length), 1 );
+////		  var el = pp.splice( 0, 1 );
+//		  rpp.push(el[0]);
+//	  }
+//	  console.log("rpp size"+rpp.length);
+//	  
+//	  var returnPosition =  rpp.slice();
+//	  
+//	  // 조각 들을 Canvas에 그림
+//	  for( var y=0; y<h; y+=ph ) {
+//	    for( var x=0; x<w; x+=pw ) {
+//	      // 조각 들을 그림
+//	      var p = rpp.shift();
+//	      //returnPosition.push(p);
+//	      context.drawImage(this.img, p[0], p[1], pw, ph, x, y, pw, ph);
+//	      
+//	      // 조각에 그림자를 추가
+//	     //this.draw_shadow(context, x, y, pw, ph);
+//	    }
+//	  }
+//	  
+//	  return returnPosition;
+//
+//};
+//
+//
+//
+//
+//ImgEncrypt.prototype.decode = function(key, wCnt, hCnt) {
+//	var useKey = key.slice();
+//	
+////	var targetImg = JavaScriptUtil.isString(imgSelector)?document.querySelector(imgSelector):imgSelector;//new Image();
+////	var targetCanvas = JavaScriptUtil.isString(canvasSelector)?document.querySelector(canvasSelector):canvasSelector;
+////	var targetContext = targetCanvas.getContext("2d");
+//	this.canvas.width = this.img.width;
+//	this.canvas.height = this.img.height;
+//	
+//	
+//	
+//	var newCanvas = document.createElement("canvas");
+//	var newContext = newCanvas.getContext("2d");
+//	newCanvas.width = this.canvas.width;
+//	newCanvas.height = this.canvas.height;
+//	
+//	var w = parseInt(this.canvas.width);
+//	var h = parseInt(this.canvas.height);
+//
+//	// 분할 할 조각 수 
+//	var n1 = wCnt; // 가로 
+//	var n2 = hCnt; //세로
+//	  
+//	  // 한 조각의 크기
+//	var pw = w / n1;
+//	var ph = h / n2
+//	  
+//	  
+////	  for (var i = 0; i < key.length; i++) {
+////		  context.drawImage(this.canvas, key[i][0], key[i][1], pw, ph, x, y, pw, ph);
+////	  }
+////	  
+////	  // 조각 들을 Canvas에 그림
+//	  for( var y=0; y<h; y+=ph ) {
+//	    for( var x=0; x<w; x+=pw ) {
+////	      // 조각 들을 그림
+//	      var p = useKey.shift();
+//	      //context.drawImage(this.img, p[0], p[1], pw, ph, x, y, pw, ph);
+////	      context.drawImage(this.canvas,  p[0], p[1], pw, ph,x, y, pw, ph);
+//	      newContext.drawImage(this.img, x, y, pw, ph, p[0], p[1], pw, ph);
+////	      context.drawImage(img, p[0], p[1], pw, ph, x, y, pw, ph);
+////	      // 조각에 그림자를 추가
+////	     //this.draw_shadow(context, x, y, pw, ph);
+//	    }
+//	  }
+//	
+////	var setCanvas = JavaScriptUtil.isString(targetCanvas)?document.querySelector(targetCanvas):canvasSelector;
+////	setCanvas.width = this.canvas.width;
+////	setCanvas.height = this.canvas.height;
+//	this.canvas.getContext("2d").drawImage(newCanvas, 0,0);
+//};
 
 
 
