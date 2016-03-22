@@ -930,6 +930,35 @@ $.fileExif = function(file, callback) {
     reader.readAsBinaryString(getFilePart(file));
 };
 
+
+
+
+$.exifByBinary = function(binaryResult) {
+	var binaryResponse = new BinaryFile(binaryResult);
+	var exif = EXIF.readFromBinaryFile(binaryResponse);
+	exif['base64'] =btoa(binaryResult);
+	return exif;
+}
+//
+//$.fn.fileExifBase64 = function(file,callback) {
+//    var reader = new FileReader();
+//
+//    reader.onload = (function(theFile) {
+//    	return function(event) {
+//	        var content = event.target.result;
+//	        var binaryResponse = new BinaryFile(content);
+//	        var exif = EXIF.readFromBinaryFile(binaryResponse);
+////	        var exif =new Object();
+//	        exif['base64'] = "data:"+theFile.type+";base64,"+btoa(content); 
+//	        exif['file'] = theFile;
+//	        callback(exif);
+//    	}
+//    })(file);
+////    reader.readAsDataURL(getFilePart(file));
+////    reader.readAsBinaryString(getFilePart(this[0].files[0]));
+//    reader.readAsBinaryString(getFilePart(file));
+//}; 
+
 })();
 
 })(jQuery);

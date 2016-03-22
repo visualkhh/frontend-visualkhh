@@ -13,8 +13,8 @@ video {
 }
 
 </style>
-<script type="text/javascript" src="./exif-js-master/exif.js"></script>
-<script type="text/javascript" src="./exif-js-master/binary.js"></script>
+<script type="text/javascript" src="../exif.js"></script>
+<!-- <script type="text/javascript" src="../binary.js"></script> -->
 
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function() {
@@ -27,7 +27,13 @@ document.addEventListener("DOMContentLoaded", function() {
 	    if( ! file ) { return; }
 	    
 	    EXIF.getData(event.target.files[0], function() {
-	        document.getElementById("trace").innerHTML=(EXIF.pretty(this));
+	     	document.getElementById("trace").innerHTML=(EXIF.pretty(this));
+	        
+	        
+	        var span = document.createElement('span');
+	        span.innerHTML = ['<img class="thumb" src="',this.getImgBase64(),
+	                          '" title="', escape(this.name), '"/>'].join('');
+	        document.getElementById('list').insertBefore(span, null);
 	    	//alert();
 	    });
 	    
@@ -45,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <div id="trace">
 </div>
+<div id="list"/>
 
 
 </body>

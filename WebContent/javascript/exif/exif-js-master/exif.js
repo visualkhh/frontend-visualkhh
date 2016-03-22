@@ -1,3 +1,29 @@
+/*
+	  var input = document.querySelector('input[type="file"]');
+	  input.addEventListener("change", function(event) {
+	    // FileList 오브젝트
+	    var files = event.target.files;
+	    // 선택된 파일을 나타내는 File 오브젝트
+	    var file = files[0];
+	    if( ! file ) { return; }
+	    //this.exifdata....
+	    EXIF.getData(event.target.files[0], function() {
+	     	document.getElementById("trace").innerHTML=(EXIF.pretty(this));
+	        
+	        
+	        var span = document.createElement('span');
+	        span.innerHTML = ['<img class="thumb" src="',this.getImgBase64(),
+	                          '" title="', escape(this.name), '"/>'].join('');
+	        document.getElementById('list').insertBefore(span, null);
+	    	//alert();
+	    });
+	    
+	    
+	  }, false);
+
+
+ */
+
 (function() {
 
     var debug = false;
@@ -347,6 +373,20 @@
             var iptcdata = findIPTCinJPEG(binFile);
             img.exifdata = data || {};
             img.iptcdata = iptcdata || {};
+            
+            
+            //arrayBufferToBase64
+            var binary = '';
+            var bytes = new Uint8Array( binFile );
+            var len = bytes.byteLength;
+            for (var i = 0; i < len; i++) {
+                binary += String.fromCharCode( bytes[ i ] );
+            }
+            img['base64'] = window.btoa( binary );
+            img['getImgBase64'] = function(){
+            	return "data:"+this.type+";base64,"+this.base64;
+            }
+            
             if (callback) {
                 callback.call(img);
             }

@@ -15,12 +15,18 @@
         <input type="text" name="aperture" id="aperture" /> </br>
 
       </form>
+      <div id="list">
+      </div>
       <script>
         var someCallback = function(exifObject) {
 
-            $('#cameraModel').val(exifObject.Model);
-            $('#aperture').val(exifObject.FNumber);
-
+//             $('#cameraModel').val(exifObject.Model);
+//             $('#aperture').val(exifObject.FNumber);
+            
+	        var span = document.createElement('span');
+	        span.innerHTML = ['<img class="thumb" src="',exifObject.base64,
+	                          '" title="', escape(exifObject.file.name), '"/>'].join('');
+	        document.getElementById('list').insertBefore(span, null);
             // Uncomment the line below to examine the
             // EXIF object in console to read other values
             //console.log(exifObject);
@@ -29,7 +35,8 @@
 
       try {
         $('#file').change(function() {
-            $(this).fileExif(someCallback);
+            //$(this).fileExif(someCallback);
+            $(this).fileExifBase64(someCallback);
         });
       }
       catch (e) {
@@ -37,5 +44,6 @@
       }
 
     </script>
+    
     </body>
     </html>

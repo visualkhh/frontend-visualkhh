@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script type="text/javascript" src="../../sizzle.js"></script>
+<script type="text/javascript" src="../../util.js"></script>
+<script type="text/javascript" src="../../../../jquery/2.1.4/jquery-2.1.4.js"></script>
+<script type="text/javascript">
+var w =20;
+var h =20;
+
+var key = undefined;
+document.addEventListener("DOMContentLoaded", function() {
+	$('#photo-form-file').change(function(){
+		var files = event.target.files;
+		for (var i = 0; i < files.length; i++) {
+			//l+=files[i]+"<br>";
+			var file = files[i];
+			if (!file.type.match('image.*')) {
+	        	continue;
+			}
+			ImageUtil.thumbnailFileToImg(file,100,function(e){
+			document.body.appendChild(e); 
+			});
+		}
+	});
+});
+
+</script>
+<title>Insert title here</title>
+</head>
+<body>
+<div>
+</div>
+<!-- <span><canvas id="can"></canvas></span> -->
+
+<div>
+<input id="photo-form-file" type="file" />
+<span><canvas id="dcan" width="100" height="100"></canvas></span>
+</div>
+</body>
+</html>

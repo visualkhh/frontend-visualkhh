@@ -54,15 +54,16 @@
     
     var s = $('#s').slider(option);
     s.on('slide',function(ev){
-    	$("#trace").append("<div>"+ev+"</div>");
+    	$("#trace").append("<div>"+ev.value+"</div>");
     	//alert(ev);
     });
+    
     
     var option2 = {
     		"min":10,
     		"max":1000,
     		"step":5,
-    		"value":[250,450,10]
+    		"value":[250,450,60]
     		
     };
     var ss = $('#ss').slider(option2);

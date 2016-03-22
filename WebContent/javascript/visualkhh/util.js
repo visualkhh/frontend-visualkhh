@@ -5,14 +5,14 @@
 
 
 function ObjectK (){};
-ObjectK.prototype = new Object();//상속
+ObjectK.prototype = new Object();//상속 Object.create(Object.prototype);
 ObjectK.prototype.keys = function(type){
 	var values = new Array();
 	for(var key in this){
 		if(!type || String((typeof this[key])).toUpperCase() == String(type).toUpperCase()){
 			values.push(key);
 		}
-	}
+	}  
 	return values;
 }
 ObjectK.prototype.values = function(type){
@@ -652,9 +652,13 @@ DateUtil.getMilliSecond=function(){
 };
 //finger
 //yyyy yy ,    MM ,dd  ,e , HH hh , mm, ss ,a/p
+//yyyy.MM.dd HH:mm:ss
 DateUtil.getDate  = function(format_s,date_o){
 	if(!date_o){
 		date_o = new Date();
+	}
+	if(!isNaN(date_o)){
+		date_o = new Date(date_o);
 	}
 	
 	//var weekName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
@@ -1152,6 +1156,273 @@ ConvertingUtil.concatenateToString=function(object_o,unionString_s,spilString_s,
     return results.join(spilString_s);
 };
 
+ConvertingUtil.binaryStrToBase64=function(binaryStr){
+	return btoa(binaryStr);
+};
+ConvertingUtil.base64TobinaryStr=function(binaryStr){
+	return atob(binaryStr);
+};
+ConvertingUtil.arrayBufferToBase64=function(buffer) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
+ConvertingUtil.base64ToArrayBuffer = function(base64, contentType) {
+    contentType = contentType || base64.match(/^data\:([^\;]+)\;base64,/mi)[1] || ''; // e.g. 'data:image/jpeg;base64,...' => 'image/jpeg'
+    base64 = base64.replace(/^data\:([^\;]+)\;base64,/gmi, '');
+    var binary = atob(base64);
+    var len = binary.length;
+    var buffer = new ArrayBuffer(len);
+    var view = new Uint8Array(buffer);
+    for (var i = 0; i < len; i++) {
+        view[i] = binary.charCodeAt(i);
+    }
+    return buffer;
+}
+
+ConvertingUtil.objectURLToBlob = function(url, callback) {
+    var http = new XMLHttpRequest();
+    http.open("GET", url, true);
+    http.responseType = "blob";
+    http.onload = function(e) {
+        if (this.status == 200 || this.status === 0) {
+            callback(this.response);
+        }
+    };
+    http.send();
+}
+ConvertingUtil.JsonStringToObject = function(strJson){
+	return JSON.parse(strJson);
+}
+
+//ConvertingUtil.Base64EncodeUrl = function(str){
+//    return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+//}
+//ConvertingUtil.Base64DecodeUrl = function(str){
+//    //str = (str + '===').slice(0, str.length + (str.length % 4));
+//    return str.replace(/-/g, '+').replace(/_/g, '/');
+//}
+
+
+
+
+
+
+ConvertingUtil.Base64EncodeUrl = function(str){
+return str.replace(/\+/g, '-').replace(/\//g, '_');
+}
+ConvertingUtil.Base64DecodeUrl = function(str){
+//str = (str + '===').slice(0, str.length + (str.length % 4));
+return str.replace(/-/g, '+').replace(/_/g, '/');
+}
+
+//ConvertingUtil.Base64urlDecode = function(str){
+//    str=str.replace(new RegExp('\\+','g'),' ');
+//    return unescape(str);
+//}
+//ConvertingUtil.Base64urlEncode = function(str){
+//    str=escape(str);
+//    str=str.replace(new RegExp('\\+','g'),'%2B');
+//    return str.replace(new RegExp('%20','g'),'+');
+//}
+
+//var END_OF_INPUT = -1;
+//var base64Chars = new Array(
+//    'A','B','C','D','E','F','G','H',
+//    'I','J','K','L','M','N','O','P',
+//    'Q','R','S','T','U','V','W','X',
+//    'Y','Z','a','b','c','d','e','f',
+//    'g','h','i','j','k','l','m','n',
+//    'o','p','q','r','s','t','u','v',
+//    'w','x','y','z','0','1','2','3',
+//    '4','5','6','7','8','9','+','/'
+//);
+//var reverseBase64Chars = new Array();
+//for (var i=0; i < base64Chars.length; i++){
+//    reverseBase64Chars[base64Chars[i]] = i;
+//}
+//var base64Str;
+//var base64Count;
+//function setBase64Str(str){
+//    base64Str = str;
+//    base64Count = 0;
+//}
+//function readBase64(){    
+//    if (!base64Str) return END_OF_INPUT;
+//    if (base64Count >= base64Str.length) return END_OF_INPUT;
+//    var c = base64Str.charCodeAt(base64Count) & 0xff;
+//    base64Count++;
+//    return c;
+//}
+//function encodeBase64(str){
+//    setBase64Str(str);
+//    var result = '';
+//    var inBuffer = new Array(3);
+//    var lineCount = 0;
+//    var done = false;
+//    while (!done && (inBuffer[0] = readBase64()) != END_OF_INPUT){
+//        inBuffer[1] = readBase64();
+//        inBuffer[2] = readBase64();
+//        result += (base64Chars[ inBuffer[0] >> 2 ]);
+//        if (inBuffer[1] != END_OF_INPUT){
+//            result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30) | (inBuffer[1] >> 4) ]);
+//            if (inBuffer[2] != END_OF_INPUT){
+//                result += (base64Chars [((inBuffer[1] << 2) & 0x3c) | (inBuffer[2] >> 6) ]);
+//                result += (base64Chars [inBuffer[2] & 0x3F]);
+//            } else {
+//                result += (base64Chars [((inBuffer[1] << 2) & 0x3c)]);
+//                result += ('=');
+//                done = true;
+//            }
+//        } else {
+//            result += (base64Chars [(( inBuffer[0] << 4 ) & 0x30)]);
+//            result += ('=');
+//            result += ('=');
+//            done = true;
+//        }
+//        lineCount += 4;
+//        if (lineCount >= 76){
+//            result += ('\n');
+//            lineCount = 0;
+//        }
+//    }
+//    return result;
+//}
+//function readReverseBase64(){   
+//    if (!base64Str) return END_OF_INPUT;
+//    while (true){      
+//        if (base64Count >= base64Str.length) return END_OF_INPUT;
+//        var nextCharacter = base64Str.charAt(base64Count);
+//        base64Count++;
+//        if (reverseBase64Chars[nextCharacter]){
+//            return reverseBase64Chars[nextCharacter];
+//        }
+//        if (nextCharacter == 'A') return 0;
+//    }
+//    return END_OF_INPUT;
+//}
+//
+//function ntos(n){
+//    n=n.toString(16);
+//    if (n.length == 1) n="0"+n;
+//    n="%"+n;
+//    return unescape(n);
+//}
+//
+//function decodeBase64(str){
+//    setBase64Str(str);
+//    var result = "";
+//    var inBuffer = new Array(4);
+//    var done = false;
+//    while (!done && (inBuffer[0] = readReverseBase64()) != END_OF_INPUT
+//        && (inBuffer[1] = readReverseBase64()) != END_OF_INPUT){
+//        inBuffer[2] = readReverseBase64();
+//        inBuffer[3] = readReverseBase64();
+//        result += ntos((((inBuffer[0] << 2) & 0xff)| inBuffer[1] >> 4));
+//        if (inBuffer[2] != END_OF_INPUT){
+//            result +=  ntos((((inBuffer[1] << 4) & 0xff)| inBuffer[2] >> 2));
+//            if (inBuffer[3] != END_OF_INPUT){
+//                result +=  ntos((((inBuffer[2] << 6)  & 0xff) | inBuffer[3]));
+//            } else {
+//                done = true;
+//            }
+//        } else {
+//            done = true;
+//        }
+//    }
+//    return result;
+//}
+//
+//var digitArray = new Array('0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f');
+//function toHex(n){
+//    var result = ''
+//    var start = true;
+//    for (var i=32; i>0;){
+//        i-=4;
+//        var digit = (n>>i) & 0xf;
+//        if (!start || digit != 0){
+//            start = false;
+//            result += digitArray[digit];
+//        }
+//    }
+//    return (result==''?'0':result);
+//}
+//
+//function pad(str, len, pad){
+//    var result = str;
+//    for (var i=str.length; i<len; i++){
+//        result = pad + result;
+//    }
+//    return result;
+//}
+//
+//function encodeHex(str){
+//    var result = "";
+//    for (var i=0; i<str.length; i++){
+//        result += pad(toHex(str.charCodeAt(i)&0xff),2,'0');
+//    }
+//    return result;
+//}
+//
+//var hexv = {
+//  "00":0,"01":1,"02":2,"03":3,"04":4,"05":5,"06":6,"07":7,"08":8,"09":9,"0A":10,"0B":11,"0C":12,"0D":13,"0E":14,"0F":15,
+//  "10":16,"11":17,"12":18,"13":19,"14":20,"15":21,"16":22,"17":23,"18":24,"19":25,"1A":26,"1B":27,"1C":28,"1D":29,"1E":30,"1F":31,
+//  "20":32,"21":33,"22":34,"23":35,"24":36,"25":37,"26":38,"27":39,"28":40,"29":41,"2A":42,"2B":43,"2C":44,"2D":45,"2E":46,"2F":47,
+//  "30":48,"31":49,"32":50,"33":51,"34":52,"35":53,"36":54,"37":55,"38":56,"39":57,"3A":58,"3B":59,"3C":60,"3D":61,"3E":62,"3F":63,
+//  "40":64,"41":65,"42":66,"43":67,"44":68,"45":69,"46":70,"47":71,"48":72,"49":73,"4A":74,"4B":75,"4C":76,"4D":77,"4E":78,"4F":79,
+//  "50":80,"51":81,"52":82,"53":83,"54":84,"55":85,"56":86,"57":87,"58":88,"59":89,"5A":90,"5B":91,"5C":92,"5D":93,"5E":94,"5F":95,
+//  "60":96,"61":97,"62":98,"63":99,"64":100,"65":101,"66":102,"67":103,"68":104,"69":105,"6A":106,"6B":107,"6C":108,"6D":109,"6E":110,"6F":111,
+//  "70":112,"71":113,"72":114,"73":115,"74":116,"75":117,"76":118,"77":119,"78":120,"79":121,"7A":122,"7B":123,"7C":124,"7D":125,"7E":126,"7F":127,
+//  "80":128,"81":129,"82":130,"83":131,"84":132,"85":133,"86":134,"87":135,"88":136,"89":137,"8A":138,"8B":139,"8C":140,"8D":141,"8E":142,"8F":143,
+//  "90":144,"91":145,"92":146,"93":147,"94":148,"95":149,"96":150,"97":151,"98":152,"99":153,"9A":154,"9B":155,"9C":156,"9D":157,"9E":158,"9F":159,
+//  "A0":160,"A1":161,"A2":162,"A3":163,"A4":164,"A5":165,"A6":166,"A7":167,"A8":168,"A9":169,"AA":170,"AB":171,"AC":172,"AD":173,"AE":174,"AF":175,
+//  "B0":176,"B1":177,"B2":178,"B3":179,"B4":180,"B5":181,"B6":182,"B7":183,"B8":184,"B9":185,"BA":186,"BB":187,"BC":188,"BD":189,"BE":190,"BF":191,
+//  "C0":192,"C1":193,"C2":194,"C3":195,"C4":196,"C5":197,"C6":198,"C7":199,"C8":200,"C9":201,"CA":202,"CB":203,"CC":204,"CD":205,"CE":206,"CF":207,
+//  "D0":208,"D1":209,"D2":210,"D3":211,"D4":212,"D5":213,"D6":214,"D7":215,"D8":216,"D9":217,"DA":218,"DB":219,"DC":220,"DD":221,"DE":222,"DF":223,
+//  "E0":224,"E1":225,"E2":226,"E3":227,"E4":228,"E5":229,"E6":230,"E7":231,"E8":232,"E9":233,"EA":234,"EB":235,"EC":236,"ED":237,"EE":238,"EF":239,
+//  "F0":240,"F1":241,"F2":242,"F3":243,"F4":244,"F5":245,"F6":246,"F7":247,"F8":248,"F9":249,"FA":250,"FB":251,"FC":252,"FD":253,"FE":254,"FF":255
+//};
+//
+//function decodeHex(str){
+//    str = str.toUpperCase().replace(new RegExp("s/[^0-9A-Z]//g"));
+//    var result = "";
+//    var nextchar = "";
+//    for (var i=0; i<str.length; i++){
+//        nextchar += str.charAt(i);
+//        if (nextchar.length == 2){
+//            result += ntos(hexv[nextchar]);
+//            nextchar = "";
+//        }
+//    }
+//    return result;
+//    
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+//ConvertingUtil.arrayBufferToBase64=function(uarr) {
+//    var strings = [], chunksize = 0xffff;
+//    var len = uarr.length;
+//
+//    for (var i = 0; i * chunksize < len; i++){
+//        strings.push(String.fromCharCode.apply(null, uarr.subarray(i * chunksize, (i + 1) * chunksize)));
+//    }
+//
+//    return strings.join("");
+//}
 //쓰지말것
 /*ConvertingUtil.trim=function(msg_s){
 	return msg_s.replace(/^\s*|\s*$/g,'');
@@ -2073,6 +2344,7 @@ JavaScriptUtil.isNull = function(object_o) {
 
 JavaScriptUtil.isArray=function(object_o){
 	return  Object.prototype.toString.call(object_o)=='[object Array]	';
+	//x.constructor.toString().indexOf("Array") > -1;
 };
 JavaScriptUtil.isNumber=function(object_o){
 	return  Object.prototype.toString.call(object_o)=='[object Number]';
@@ -2124,6 +2396,26 @@ JavaScriptUtil.copyObject=function(object_o){
 	return  return_obj;
 };
 
+JavaScriptUtil.objectToString=function(object_o){
+	return  JSON.stringify(object_o);
+};
+JavaScriptUtil.arrayToString=function(object_o,join){  //array속에 object들을 문자열로 보내준다.
+	if(!join){join=",";}
+	var transData = new Array();
+	for(var i =0 ; i < object_o.length; i++){
+		transData.push(JavaScriptUtil.objectToString(object_o[i]));
+	}
+	return  "["+transData.join(join)+"]";
+};
+JavaScriptUtil.arrayToStringConFnc=function(object_o,confnc,join){  //array속에 object들을 문자열로 보내준다.
+	if(!join){join=",";}
+	var transData = new Array();
+	for(var i =0 ; i < object_o.length; i++){
+		transData.push(JavaScriptUtil.objectToString(confnc(object_o[i])));
+//		transData.push(JavaScriptUtil.objectToString(object_o[i]));
+	}
+	return  "["+transData.join(join)+"]";
+};
 // 왠만하면 copyObject쓰세요  이건 제이슨 값만 복사됨
 
 JavaScriptUtil.copyJson=function(object_o){
@@ -2257,7 +2549,7 @@ MathUtil.radTodeg=function(rad) {
 
 
 //end - start    끝과 시작의 사이길이를 취득한다.
-MathUtil.getBetweenLength=function(start, end){
+MathUtil.getBetweenSize=function(start, end){
 	return end - start;
 };
 
@@ -2300,6 +2592,79 @@ MathUtil.getValuePercentDown=function(tot, wantPercent){
 	 */
 	return tot * (1 - wantPercent / 100);
 };
+
+//returns a function that calculates lanczos weight
+MathUtil.lanczosCreate = function(lobes) {
+    return function(x) {
+        if (x > lobes)
+            return 0;
+        x *= Math.PI;
+        if (Math.abs(x) < 1e-16)
+            return 1;
+        var xx = x / lobes;
+        return Math.sin(x) * Math.sin(xx) / x / xx;
+    };
+};
+
+MathUtil.minMath = function(array) {
+	if(array)
+	return Math.min.apply(null, array); //결과값은 0
+};
+MathUtil.maxMath = function(array) {
+	if(array)
+	return Math.max.apply(null, test); //결과값은 99
+};
+
+//배열 콜백함수를 이용한..민맥스
+MathUtil.max = function(array) {
+	if(array && array.length > 0){
+		var max = array.reduce( function (previous, current) { 
+			return previous > current ? previous:current;
+		});
+		return max;
+	}
+}
+MathUtil.min = function(array) {
+	if(array && array.length > 0){
+		var min = array.reduce( function (previous, current) { 
+			return previous > current ? current:previous;
+		});
+		return min;
+	}
+}
+MathUtil.maxConfnc = function(array,confnc) {
+	if(array && array.length > 0){
+		var max = array.reduce( function (previous, current) { 
+			return confnc(previous) > confnc(current) ? confnc(previous):confnc(current);
+		});
+		return max;
+	}
+}
+MathUtil.minConfnc = function(array,confnc) {
+	if(array && array.length > 0){
+		var min = array.reduce( function (previous, current) { 
+			return confnc(previous) > confnc(current) ? confnc(current):confnc(previous);
+		});
+		return min;
+	}
+}
+MathUtil.max2Array = function(array,propertyName) {
+	if(array && array.length > 0){
+		var max = array.reduce( function (previous, current) { 
+			return previous[propertyName] > current[propertyName] ? previous[propertyName]:current[propertyName];
+		});
+		return max;
+	}
+}
+MathUtil.min2Array = function(array,propertyName) {
+	if(array && array.length > 0){
+		var min = array.reduce( function (previous, current) { 
+			return previous[propertyName] > current[propertyName] ? current[propertyName]:previous[propertyName];
+		});
+		return min;
+	}
+}
+
 
 
 
@@ -2985,6 +3350,49 @@ Vector.prototype.toArray = function(){
 
 
 
+HashMap = function(){  
+    this.map = new Object();
+};  
+HashMap.prototype = {  
+    put : function(key, value){  
+//    	if(this.map[key]&&this.map[key].finalize){
+//    		try{this.map[key].finalize();}catch(e){}
+//    	}
+    	this.map[key] = null;
+    	this.map[key] = undefined;
+        this.map[key] = value;
+    },  
+    get : function(key){  
+        return this.map[key];
+    },  
+    getAll : function(){  
+        return this.map;
+    },  
+    clear : function(){  
+//    	if(this.map[key]&&this.map[key].finalize){
+//    		try{this.map[key].finalize();}catch(e){}
+//    	}
+    	this.map = null;
+    	this.map = undefined;
+        this.map =new Object();
+    },  
+    getKeys : function(){  
+        var keys = new Array();  
+        for(i in this.map){  
+            keys.push(i);
+        }  
+        return keys;
+    },
+    remove : function(key){
+//    	if(this.map[key]&&this.map[key].finalize){
+//    		try{this.map[key].finalize();}catch(e){}
+//    	}
+    	this.map[key] = null;
+    	this.map[key] = undefined;
+    	return delete this.map[key];
+    }
+};
+
 
 
 
@@ -3575,8 +3983,8 @@ ImgEncrypt.prototype.encode = function(wminSize,hSize) {
 	  var list = new Array();
 	  var yIndex = -1;
 	  while(yPoint<imgH){
-		  var wSize = JavaScriptUtil.getRandomInt(wminSize)+1;
-//		  var wSize = wminSize;
+//		  var wSize = JavaScriptUtil.getRandomInt(wminSize)+1;
+		  var wSize = wminSize;
 		  if(xPoint+wSize>imgW){wSize = imgW-xPoint;}; //넘치면 셋팅
 		  
 		  
@@ -3623,6 +4031,8 @@ ImgEncrypt.prototype.encode = function(wminSize,hSize) {
 		  radnomList.push(el[0]);
 	  }
 	  
+	  
+
 ////	  
 //	  var radnomList = radnomWList;
 	  
@@ -3639,7 +4049,6 @@ ImgEncrypt.prototype.encode = function(wminSize,hSize) {
 				  xPoint=0;
 			  }
 		  }
-		  
 	  }
 	  
 	  return radnomList;
@@ -3650,7 +4059,7 @@ ImgEncrypt.prototype.decode = function(key) {
 	this.canvas.width = this.img.width;
 	this.canvas.height = this.img.height;
 	var context = this.canvas.getContext("2d");
-	
+	//context.fillRect(0,0,this.canvas.width,this.canvas.height);
 	  var yPoint = 0;
 	  var xPoint = 0;
 	  //decode
@@ -3669,280 +4078,217 @@ ImgEncrypt.prototype.decode = function(key) {
 	  
 }
 
-//ImgEncrypt.prototype.encode = function(wCnt,hCnt) {
-//	
-//	  // canvas요소
-//	  var context = this.canvas.getContext("2d");
-//	  this.canvas.width = this.img.width;
-//	  this.canvas.height =this.img.height;
-//	  
-//	  
-//	  var w = parseInt(this.canvas.width);
-//	  var h = parseInt(this.canvas.height);
-//
-//	// 분할 할 조각 수 
-//	  var n1 = wCnt; // 가로 
-//	  var n2 = hCnt; //세로
-//	  
-//	  // 한 조각의 크기
-//	  var pw = w / n1;
-//	  var ph = h / n2;
-//	           
-//	  // 각 조각의 왼쪽 위의 좌표를 배열에 넣기
-//	  var pp = [];
-//	  for( var y=0; y<h; y+=ph ) {
-//	    for( var x=0; x<w; x+=pw ) {
-//	      pp.push([x, y]);
-//	    }
-//	  }
-//
-//	  console.log("pp size"+pp.length);
-//	  var rpp = [];
-//	  while( pp.length > 0 ){
-////		  var el = pp.splice( Math.floor(Math.random() * pp.length), 1 );
-//		  var el = pp.splice( JavaScriptUtil.getRandomInt(pp.length), 1 );
-////		  var el = pp.splice( 0, 1 );
-//		  rpp.push(el[0]);
-//	  }
-//	  console.log("rpp size"+rpp.length);
-//	  
-//	  var returnPosition =  rpp.slice();
-//	  
-//	  // 조각 들을 Canvas에 그림
-//	  for( var y=0; y<h; y+=ph ) {
-//	    for( var x=0; x<w; x+=pw ) {
-//	      // 조각 들을 그림
-//	      var p = rpp.shift();
-//	      //returnPosition.push(p);
-//	      context.drawImage(this.img, p[0], p[1], pw, ph, x, y, pw, ph);
-//	      
-//	      // 조각에 그림자를 추가
-//	     //this.draw_shadow(context, x, y, pw, ph);
-//	    }
-//	  }
-//	  
-//	  return returnPosition;
-//
-//};
-//
-//
-//
-//
-//ImgEncrypt.prototype.decode = function(key, wCnt, hCnt) {
-//	var useKey = key.slice();
-//	
-////	var targetImg = JavaScriptUtil.isString(imgSelector)?document.querySelector(imgSelector):imgSelector;//new Image();
-////	var targetCanvas = JavaScriptUtil.isString(canvasSelector)?document.querySelector(canvasSelector):canvasSelector;
-////	var targetContext = targetCanvas.getContext("2d");
-//	this.canvas.width = this.img.width;
-//	this.canvas.height = this.img.height;
-//	
-//	
-//	
-//	var newCanvas = document.createElement("canvas");
-//	var newContext = newCanvas.getContext("2d");
-//	newCanvas.width = this.canvas.width;
-//	newCanvas.height = this.canvas.height;
-//	
-//	var w = parseInt(this.canvas.width);
-//	var h = parseInt(this.canvas.height);
-//
-//	// 분할 할 조각 수 
-//	var n1 = wCnt; // 가로 
-//	var n2 = hCnt; //세로
-//	  
-//	  // 한 조각의 크기
-//	var pw = w / n1;
-//	var ph = h / n2
-//	  
-//	  
-////	  for (var i = 0; i < key.length; i++) {
-////		  context.drawImage(this.canvas, key[i][0], key[i][1], pw, ph, x, y, pw, ph);
-////	  }
-////	  
-////	  // 조각 들을 Canvas에 그림
-//	  for( var y=0; y<h; y+=ph ) {
-//	    for( var x=0; x<w; x+=pw ) {
-////	      // 조각 들을 그림
-//	      var p = useKey.shift();
-//	      //context.drawImage(this.img, p[0], p[1], pw, ph, x, y, pw, ph);
-////	      context.drawImage(this.canvas,  p[0], p[1], pw, ph,x, y, pw, ph);
-//	      newContext.drawImage(this.img, x, y, pw, ph, p[0], p[1], pw, ph);
-////	      context.drawImage(img, p[0], p[1], pw, ph, x, y, pw, ph);
-////	      // 조각에 그림자를 추가
-////	     //this.draw_shadow(context, x, y, pw, ph);
-//	    }
-//	  }
-//	
-////	var setCanvas = JavaScriptUtil.isString(targetCanvas)?document.querySelector(targetCanvas):canvasSelector;
-////	setCanvas.width = this.canvas.width;
-////	setCanvas.height = this.canvas.height;
-//	this.canvas.getContext("2d").drawImage(newCanvas, 0,0);
-//};
+function CanvasUtil (){}; //window.File
+CanvasUtil.prototype = new Object();
+CanvasUtil.toDataURL = function(canvas){
+	return canvas.toDataURL();
+}
+
+function FileUtil (){}; //window.File
+FileUtil.prototype = new Object();
+FileUtil.readBase64 = function(file,callback){  //base64
+	FileUtil.readDataURL(file,callback);	
+}
+FileUtil.readDataURL = function(file,callback){ 
+	var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function() {
+    	callback(reader.result);
+    };
+    reader.readAsDataURL(file);
+}
+FileUtil.readDataURLToImg = function(file,imgonloadcallback){
+	var reader = new FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = function(e) {
+		 var img = new Image();
+		 if(imgonloadcallback){
+			 img.onload = imgonloadcallback; //ie.target.src  //ie.target.src
+		 }
+	    img.src = reader.result;
+		//callback(img);
+	};
+	try{
+	reader.readAsDataURL(file);
+	}catch(err){
+		
+	}
+}
+FileUtil.readAsBinaryString = function(file,callback){
+	var reader = new FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = function() {
+		callback(reader.result);
+	};
+	reader.readAsBinaryString(file);
+}
+FileUtil.readAsArrayBuffer = function(file,callback){
+	var reader = new FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = function() {
+		callback(reader.result);
+	};
+	reader.readAsArrayBuffer(file);
+}
+FileUtil.readAsText = function(file,callback){
+	var reader = new FileReader();
+	reader.readAsDataURL(file);
+	reader.onload = function() {
+		callback(reader.result);
+	};
+	reader.readAsText(file);
+}
 
 
+FileUtil.createObjectURL = function(file){
+	return window.webkitURL.createObjectURL(file);
+}
 
-
-
-/*
-Date.prototype.format = function(f) {
-    if (!this.valueOf()) return " ";
- 
-    var weekName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-    var d = this;
-     
-    return f.replace(/(yyyy|yy|MM|dd|E|hh|mm|ss|a\/p)/gi, function($1) {
-        switch ($1) {
-            case "yyyy": return d.getFullYear();
-            case "yy": return (d.getFullYear() % 1000).zf(2);
-            case "MM": return (d.getMonth() + 1).zf(2);
-            case "dd": return d.getDate().zf(2);
-            case "E": return weekName[d.getDay()];
-            case "HH": return d.getHours().zf(2);
-            case "hh": return ((h = d.getHours() % 12) ? h : 12).zf(2);
-            case "mm": return d.getMinutes().zf(2);
-            case "ss": return d.getSeconds().zf(2);
-            case "a/p": return d.getHours() < 12 ? "오전" : "오후";
-            default: return $1;
-        }
-    });
-};
- 
-String.prototype.string = function(len){var s = '', i = 0; while (i++ < len) { s += this; } return s;};
-String.prototype.zf = function(len){return "0".string(len - this.length) + this;};
-Number.prototype.zf = function(len){return this.toString().zf(len);};
-
- */
-
-
-/////////class
-/**
- * Javascript SimpleDateFormat Class
-	 yyyy(year) MM(month) dd(date) HH or hh(24hours/12hours) mm(minutes) ss(seconds)
-	 
-	 ex) alert(new com.kdarkdev.util.SimpleDateFormat('yyyy-MM-dd HH:mm:ss').format(new Date()));
- */
-/* use 
-var sdf = com.kdarkdev.util.SimpleDateFormat('yyyy-MM-dd hh시 mm분 ss초'); 
-//포맷지정    
-alert(sdf.format(new Date())); //출력
-*/
-/*
-var khh = (khh == undefined)?{}:khh;
-khh.date = (khh.date == undefined)?{}:khh.date; 
-//khh.date.util = (com.date.util == undefined)?{}:khh.date.util;
-
-
-khh.date.SimpleDateFormat = function(formatString_) {
-	if(formatString_ == undefined || formatString_ == '') {
-		formatString = 'yyyyMMdd';
-	} else {
-		formatString = formatString_;
+function ImageUtil (){};
+ImageUtil.prototype = new Object();
+ImageUtil.resizeToBase64=function(src, w,h,callback){
+	var img = new Image();
+	img.onload =function (e) {
+		var canvas = document.createElement('canvas');
+        var canvasContext = canvas.getContext("2d");
+			canvas.width = w;
+		    canvas.height = h;
+		    /// step 1
+		    canvasContext.drawImage(img, 0, 0, w, h);
+		    ///octx.drawImage(oc, 0, 0, oc.width * 0.5, oc.height * 0.5);
+		    var dataURI = canvas.toDataURL("image/jpeg");
+		    callback(dataURI)
 	}
 	
-	//private Method
-	plusZero = function (value_, zeroNumber) {
-		var zero = '';
-		var value = value_.toString();
-		if(value.length<zeroNumber) {
-			for(var i=0; i<zeroNumber-value.length; i++) {
-				zero+='0';
-			}
-			
-		}
-		return zero+value;
+	img.src = src;
+};
+ImageUtil.thumbnailImgToCanvas=function(img,w,callback){
+		var canvas = document.createElement('canvas');
+		var canvasContext = canvas.getContext("2d");
+		canvas.width = w;
+		canvas.height = canvas.width * (img.height / img.width);
+		
+		
+		/// step 1
+		var oc = document.createElement('canvas'),
+		octx = oc.getContext('2d');
+		
+		oc.width = img.width * 0.5;
+		oc.height = img.height * 0.5;
+		octx.drawImage(img, 0, 0, oc.width, oc.height);
+		/// step 2
+		///octx.drawImage(oc, 0, 0, oc.width * 0.5, oc.height * 0.5);
+		canvasContext.drawImage(oc, 0, 0, oc.width, oc.height,
+				0, 0, canvas.width, canvas.height);
+		callback(canvas);
+}
+
+ImageUtil.thumbnailImgToBase64=function(img,w,callback){
+	ImageUtil.thumbnailImgToCanvas(img,w,function(canvas){
+		callback(CanvasUtil.toDataURL(canvas));
+	})
+}
+ImageUtil.thumbnailBase64ToBase64=function(base64,w,callback){
+	
+	
+	ImageUtil.base64ToImg(base64, function(img){
+		ImageUtil.thumbnailImgToCanvas(img,w,function(canvas){
+			callback(CanvasUtil.toDataURL(canvas));
+		})
+	});
+}
+ImageUtil.thumbnailFileToCanvas=function(file,w,callback){
+	FileUtil.readDataURLToImg(file,function(ie){
+		
+		ImageUtil.thumbnailImgToCanvas(ie.target,w,callback);
+		
+		//document.body.appendChild(canvas);
+	});
+}
+ImageUtil.thumbnailFileToBase64=function(file,w,callback){
+	ImageUtil.thumbnailFileToCanvas(file,w,function(canvas){
+		callback(CanvasUtil.toDataURL(canvas));
+	});
+}
+ImageUtil.thumbnailFileToImg=function(file,w,callback){
+	ImageUtil.thumbnailFileToBase64(file,w,function(base64){
+		var img = new Image();
+		img.src=base64;
+		callback(img);
+	});
+}
+ImageUtil.base64ToImg=function(base64,callback){
+	var img  = new Image();
+	img.onload = function(e){
+		callback(img);
 	};
-};
+	img.src=base64;
+}
 
-khh.date.SimpleDateFormat.prototype = {
-	 
-	format: function(date){
-		var dateRegex = /(y{0,4})([^yMdHhms]*)(M{0,2})([^yMdHhms]*)(d{0,2})([^yMdHhms]*)([Hh]{0,4})([^yMdHhms]*)(m{0,2})([^yMdHhms]*)(s{0,2})([^yMdHhms]*)/g;
-		var dateRegexArray = dateRegex.exec(formatString);
-		
-		var yearFormat = dateRegexArray[1];
-		var monthFormat = dateRegexArray[3];
-		var dayFormat = dateRegexArray[5];
-		var hourFormat = dateRegexArray[7];
-		var minuteFormat = dateRegexArray[9];
-		var secondFormat = dateRegexArray[11];
-		
-		var space1 = dateRegexArray[2].toString();
-		var space2 = dateRegexArray[4].toString();
-		var space3 = dateRegexArray[6].toString();
-		var space4 = dateRegexArray[8].toString();
-		var space5 = dateRegexArray[10].toString();
-		var space6 = dateRegexArray[12].toString();
-		
-		var year = plusZero(date.getFullYear(), yearFormat.length);
-		var month = plusZero(date.getMonth() + 1, monthFormat.length);
-		var day = plusZero(date.getDate(), dayFormat.length);
-		var hour = '';
-		if (hourFormat == 'HH' || hourFormat == 'H') {
-			hour = plusZero(date.getHours(), hourFormat.length);
-		}
-		else 
-			if ((hourFormat == 'hh' || hourFormat == 'h') && date.getHours() > 12) {
-				hour = plusZero(date.getHours() - 12, hourFormat.length);
-			}
-			else 
-				if (hourFormat == 'hhHH') {
-					hour = plusZero(date.getHours() - 12, hourFormat.length - 2) + plusZero(date.getHours(), hourFormat.length - 2);
-				}
-				else 
-					if (hourFormat == 'HHhh') {
-						hour = plusZero(date.getHours(), hourFormat.length - 2) + plusZero(date.getHours() - 12, hourFormat.length - 2);
-					}
-					else {
-						hour = plusZero(date.getHours(), hourFormat.length);
-					}
-		
-		var minute = plusZero(date.getMinutes(), minuteFormat.length);
-		var second = plusZero(date.getSeconds(), secondFormat.length);
-		
-		var toDay = '';
-		if (yearFormat.length > 0) {
-			toDay += year;
-		}
-		if (space1.length > 0) {
-			toDay += space1;
-		}
-		if (monthFormat.length > 0) {
-			toDay += month;
-		}
-		if (space2.length > 0) {
-			toDay += space2;
-		}
-		if (dayFormat.length > 0) {
-			toDay += day;
-		}
-		if (space3.length > 0) {
-			toDay += space3;
-		}
-		if (hourFormat.length > 0) {
-			toDay += hour;
-		}
-		if (space4.length > 0) {
-			toDay += space4;
-		}
-		if (minuteFormat.length > 0) {
-			toDay += minute;
-		}
-		if (space5.length > 0) {
-			toDay += space5;
-		}
-		if (secondFormat.length > 0) {
-			toDay += second;
-		}
-		if (space6.length > 0) {
-			toDay += space6;
-		}
-		
-		return toDay;
-	} 
-};
+//ImageUtil.thumbnailToBase64=function(src,w,callback){
+//	var img = new Image();
+//	img.setAttribute('crossOrigin', 'anonymous');
+//	img.onload =function (e) {
+//		var canvas = document.createElement('canvas');
+//		var canvasContext = canvas.getContext("2d");
+//		canvas.width = w;
+//		canvas.height = canvas.width * (img.height / img.width);
+//
+//		
+//		  /// step 1
+//	    var oc = document.createElement('canvas'),
+//	        octx = oc.getContext('2d');
+//
+//	    oc.width = img.width * 0.5;
+//	    oc.height = img.height * 0.5;
+//	    octx.drawImage(img, 0, 0, oc.width, oc.height);
+//
+//	    /// step 2
+//	    ///octx.drawImage(oc, 0, 0, oc.width * 0.5, oc.height * 0.5);
+//	    canvasContext.drawImage(oc, 0, 0, oc.width, oc.height,
+//	    0, 0, canvas.width, canvas.height);
+//	    
+//		var dataURI = canvas.toDataURL();
+//		callback(dataURI);
+//	}
+//	
+//	img.src = src;
+////	alert(/^data\:/i.test(src));
+////	if (/^data\:/i.test(src)) { // Data URI
+////		return ImageUtil.imgThumbnail(src,w);
+////    }else{
+////    	img.src = src;
+////    }
+//};
 
-*/
+
+
+
+function DynamicUtil (){};
+DynamicUtil.prototype = new Object();
+DynamicUtil.loadJavascript=function(url, callback, charset) {
+    var head= document.getElementsByTagName('head')[0];
+    var script= document.createElement('script');
+    script.type= 'text/javascript';
+    if (charset != null) {
+        script.charset = "utf-8";
+    }
+    var loaded = false;
+    script.onreadystatechange= function (e) {
+        if (this.readyState == 'loaded' || this.readyState == 'complete') {
+            if (loaded) {
+                return;
+            }
+            loaded = true;
+            callback(e);
+        }
+    }
+    script.onload = function (e) {
+        callback(e);
+    }
+    script.src = url;
+    head.appendChild(script);
+}
 
 
 
