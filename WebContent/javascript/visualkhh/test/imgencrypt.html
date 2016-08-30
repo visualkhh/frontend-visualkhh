@@ -5,8 +5,8 @@
 <script type="text/javascript" src="../sizzle.js"></script>
 <script type="text/javascript" src="../util.js"></script>
 <script type="text/javascript">
-var w =20;
-var h =20;
+var w =5;
+var h =5;
 
 var key = undefined;
 // document.addEventListener("DOMContentLoaded", function() {
@@ -32,13 +32,13 @@ function decode(){
 <div>
 <h1>encode<button id="btn" onclick="encode()">encode</button></h1>
 
-<span><img id="img" src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSr2lMNvaI45TaH9gZ-H3UuyrX4phEboA1RSa48kVkFDwmJg8QeCw"></span>
+<span><img id="img" src="http://file.agora.media.daum.net/pcp_download.php?fhandle=SVFhM0BmaWxlLmFnb3JhLm1lZGlhLmRhdW0ubmV0Oi9LMTU3LzAvMjQuanBn&filename=1.jpg"></span>
 <span><canvas id="ecan"></canvas></span>
 </div>
 
 <div>
 <h1>decode<button id="btn" onclick="document.getElementById('eimg').src=document.getElementById('eimg').src+'#'">reload</button> <button id="btn" onclick="decode()">decode</button></h1>
-<span><img id="eimg" src="file:///C:/i.png#"></span>
+<span><img id="eimg" src="file:///d:/i.png#"></span>
 <span><canvas id="dcan"></canvas></span>
 </div>
 </body>
